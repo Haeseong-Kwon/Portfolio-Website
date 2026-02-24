@@ -96,16 +96,16 @@ const allSkills = [
 
 export default function TechStack() {
     return (
-        <section id="tech" className="py-32 px-6 md:px-12 lg:px-24 w-full bg-foreground relative overflow-hidden">
+        <section id="tech" className="py-20 md:py-24 px-6 md:px-12 lg:px-24 w-full bg-foreground relative overflow-hidden">
             <div className="max-w-[120rem] mx-auto">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                     <div className="overflow-hidden">
                         <motion.h2
                             initial={{ y: "100%" }}
                             whileInView={{ y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                            className="text-6xl md:text-8xl font-black tracking-tighter uppercase text-background leading-[0.9]"
+                            className="text-5xl md:text-7xl font-black tracking-tighter uppercase text-background leading-[0.9]"
                         >
                             TECH STACK
                         </motion.h2>
@@ -116,7 +116,7 @@ export default function TechStack() {
                             whileInView={{ y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                            className="text-background/50 font-medium tracking-widest uppercase text-sm md:text-base max-w-sm text-right"
+                            className="text-background/50 font-medium tracking-widest uppercase text-xs md:text-sm max-w-sm text-right"
                         >
                             The Complete Arsenal
                         </motion.div>
@@ -124,24 +124,24 @@ export default function TechStack() {
                 </div>
 
                 {/* Grouped Cloud Label High-Density Grid (Dark Mode) */}
-                <div className="flex flex-col gap-24 max-w-[100rem] mx-auto pt-12 border-t border-background/20">
+                <div className="flex flex-col gap-10 md:gap-14 max-w-[100rem] mx-auto pt-10 border-t border-background/20">
                     {["Frontend", "Backend", "AI", "DevOps", "Tools", "Collab"].map((category, catIdx) => {
                         const categorySkills = allSkills.filter(skill => skill.category === category);
                         if (categorySkills.length === 0) return null;
 
                         return (
-                            <div key={category} className="flex flex-col md:flex-row gap-8 md:gap-16">
+                            <div key={category} className="flex flex-col md:flex-row gap-4 md:gap-8 lg:gap-12">
                                 <motion.h3
                                     initial={{ opacity: 0, x: -20 }}
                                     whileInView={{ opacity: 1, x: 0 }}
                                     viewport={{ once: true, margin: "-50px" }}
                                     transition={{ duration: 0.6, delay: catIdx * 0.1 }}
-                                    className="text-4xl md:text-5xl font-bold tracking-tighter text-background shrink-0 w-48"
+                                    className="text-2xl md:text-3xl font-bold tracking-tighter text-background shrink-0 w-32 md:w-40 pt-1"
                                 >
                                     {category}
                                 </motion.h3>
 
-                                <div className="flex flex-wrap gap-4 w-full">
+                                <div className="flex flex-wrap gap-2 md:gap-3 w-full">
                                     {categorySkills.map((skill, idx) => (
                                         <motion.div
                                             key={skill.name}
@@ -153,9 +153,9 @@ export default function TechStack() {
                                                 delay: Math.random() * 0.3, // Random stagger for cloud effect
                                                 ease: [0.16, 1, 0.3, 1]
                                             }}
-                                            className="group relative overflow-hidden px-6 py-3 rounded-full border border-background/30 hover:bg-background transition-colors duration-500 cursor-default"
+                                            className="group relative overflow-hidden px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-background/30 hover:bg-background transition-colors duration-500 cursor-default"
                                         >
-                                            <span className="relative z-10 text-base md:text-lg font-bold tracking-tight text-background/80 group-hover:text-foreground transition-colors duration-500">
+                                            <span className="relative z-10 text-xs md:text-sm font-bold tracking-tight text-background/80 group-hover:text-foreground transition-colors duration-500">
                                                 {skill.name}
                                             </span>
                                         </motion.div>
