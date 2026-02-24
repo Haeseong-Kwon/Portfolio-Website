@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Github } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 interface Project {
     title: string;
@@ -16,69 +16,121 @@ const projects: Project[] = [
         title: "MetaSurface Designer",
         description: "AI-driven inverse design tool for nanophotonic structures, optimizing complex physical parameters in seconds.",
         github: "https://github.com/Haeseong-Kwon/Metasurface-Designer",
-        mediaUrl: "https://github.com/Haeseong-Kwon/Metasurface-Designer/blob/main/demo_smooth.gif?raw=true",
+        mediaUrl: "/projects/metasurface_designer.mp4",
     },
     {
         title: "Metasurface Process Yield Predictor",
         description: "ML pipeline predicting fabrication reliability to minimize material waste in semiconductor processes.",
         github: "https://github.com/Haeseong-Kwon/Metasurface-Process-Yield-Predictor",
-        mediaUrl: "https://github.com/Haeseong-Kwon/Metasurface-Process-Yield-Predictor/blob/main/docs/yield_predictor_demo.gif?raw=true",
+        mediaUrl: "/projects/yield_predictor.mp4",
     },
     {
         title: "Meta-Atom Dataset Factory",
         description: "High-throughput simulation engine for generating large-scale meta-atom datasets for deep learning training.",
         github: "https://github.com/Haeseong-Kwon/Meta-Atom-Dataset-Factory",
-        mediaUrl: "https://github.com/Haeseong-Kwon/Meta-Atom-Dataset-Factory/blob/main/dataset_factory_demo.webp?raw=true",
+        mediaUrl: "/projects/dataset_factory.mp4",
     },
     {
         title: "Brain MRI Assist",
         description: "PINN-based medical imaging enhancement tool, improving MRI resolution via physics-informed neural networks.",
         github: "https://github.com/Haeseong-Kwon/Brain-MRI-Assist",
-        mediaUrl: "https://github.com/Haeseong-Kwon/Brain-MRI-Assist/blob/main/brain_mri_assist_demo.gif?raw=true",
+        mediaUrl: "/projects/brain_mri_assist.mp4",
     },
     {
         title: "PINN WaveLab",
         description: "Professional framework for simulating wave physics through neural networks, bypassing traditional heavy solvers.",
         github: "https://github.com/Haeseong-Kwon/PINN-WaveLab",
-        mediaUrl: "https://github.com/Haeseong-Kwon/PINN-WaveLab/blob/main/pinn_wavelab_demo.gif?raw=true",
+        mediaUrl: "/projects/pinn_wavelab.mp4",
     },
     {
         title: "Optics Restoration Studio",
         description: "State-of-the-art AI studio for lens aberration correction and image deblurring in high-precision optics.",
         github: "https://github.com/Haeseong-Kwon/Optics-Restoration-Studio",
-        mediaUrl: "https://github.com/Haeseong-Kwon/Optics-Restoration-Studio/blob/main/optics_restoration_demo_v6_final.webp?raw=true",
+        mediaUrl: "/projects/optics_restoration.mp4",
     },
     {
         title: "CMOS Sensor Health Dashboard",
         description: "Real-time industrial monitoring dashboard using anomaly detection to ensure sensor manufacturing quality.",
         github: "https://github.com/Haeseong-Kwon/CMOS-Sensor-Health-Dashboard",
-        mediaUrl: "https://github.com/Haeseong-Kwon/CMOS-Sensor-Health-Dashboard/blob/main/assets/sensor_dashboard_full_workflow.gif?raw=true",
+        mediaUrl: "/projects/cmos_dashboard.mp4",
     },
     {
         title: "AR/VR Display Calibrator",
         description: "Computer vision solution for correcting color and distortion in next-gen AR/VR display units.",
         github: "https://github.com/Haeseong-Kwon/AR-VR-Display-Calibrator",
-        mediaUrl: "https://github.com/Haeseong-Kwon/AR-VR-Display-Calibrator/blob/main/ar_vr_calibrator_demo.gif?raw=true",
+        mediaUrl: "/projects/ar_vr_calibrator.mp4",
     },
     {
         title: "Photonics Experiment Log Analyzer",
         description: "LLM-agent that parses unstructured experimental logs into structured data assets for research teams.",
         github: "https://github.com/Haeseong-Kwon/Photonics-Experiment-Log-Analyzer",
-        mediaUrl: "https://github.com/Haeseong-Kwon/Photonics-Experiment-Log-Analyzer/blob/main/photonics_log_analyzer_demo.gif?raw=true",
+        mediaUrl: "/projects/photonics_log_analyzer.mp4",
     },
     {
         title: "Solar Cell Curve Intelligence",
         description: "Intelligence system characterizing photovoltaic efficiency curves to optimize solar cell performance.",
         github: "https://github.com/Haeseong-Kwon/Solar-Cell-Curve-Intelligence",
-        mediaUrl: "https://github.com/Haeseong-Kwon/Solar-Cell-Curve-Intelligence/blob/main/solar_cell_intelligence_demo.gif?raw=true",
+        mediaUrl: "/projects/solar_cell_curve.mp4",
     },
     {
         title: "Medical GenAI Augmentor",
         description: "Generative AI pipeline for augmenting rare medical datasets to improve diagnostic model accuracy.",
         github: "https://github.com/Haeseong-Kwon/Medical-GenAI-Augmentor",
-        mediaUrl: "https://github.com/Haeseong-Kwon/Medical-GenAI-Augmentor/blob/main/medical_augmentor_demo.gif?raw=true",
+        mediaUrl: "/projects/medical_augmentor.mp4",
     },
 ];
+
+
+
+function VideoPlayer({ project }: { project: Project }) {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const videoElement = videoRef.current;
+        if (!videoElement) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        videoElement.play().catch(e => console.log("Autoplay failed:", e));
+                    } else {
+                        videoElement.pause();
+                    }
+                });
+            },
+            {
+                threshold: 0.1, // Play when 10% visible
+            }
+        );
+
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+
+        return () => {
+            if (containerRef.current) {
+                observer.unobserve(containerRef.current);
+            }
+        };
+    }, []);
+
+    return (
+        <div ref={containerRef} className="w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out overflow-hidden">
+            <video
+                ref={videoRef}
+                src={project.mediaUrl}
+                className="w-full h-full object-cover object-center"
+                loop
+                muted
+                playsInline
+                preload="none"
+                poster=""
+            />
+        </div>
+    );
+}
 
 function ProjectCard({ project, idx }: { project: Project; idx: number }) {
     const cardRef = useRef<HTMLAnchorElement>(null);
@@ -103,13 +155,9 @@ function ProjectCard({ project, idx }: { project: Project; idx: number }) {
             className="group flex flex-col h-[28rem] cursor-pointer"
         >
             <div className="relative w-full aspect-video overflow-hidden bg-zinc-900 mb-6 rounded-sm">
-                <motion.img
-                    style={{ scale }}
-                    src={project.mediaUrl}
-                    alt={project.title}
-                    className="w-full h-full object-cover group-hover:!scale-110 transition-transform duration-700 ease-out"
-                    loading="lazy"
-                />
+                <motion.div style={{ scale }} className="w-full h-full">
+                    <VideoPlayer project={project} />
+                </motion.div>
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
                     <div className="bg-white text-black rounded-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
