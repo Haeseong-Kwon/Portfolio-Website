@@ -9,7 +9,7 @@ export default function Grain() {
     return (
         <div
             aria-hidden
-            className="pointer-events-none fixed inset-0 z-[70] opacity-[0.085] mix-blend-multiply"
+            className="pointer-events-none fixed inset-0 z-[70] opacity-[0.12] mix-blend-multiply"
             style={{
                 backgroundImage: `url("${NOISE_SVG}")`,
                 backgroundSize: "220px 220px",

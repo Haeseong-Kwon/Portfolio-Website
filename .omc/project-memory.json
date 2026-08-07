@@ -116,8 +116,14 @@
   "hotPaths": [
     {
       "path": "src/components/Hero.tsx",
-      "accessCount": 19,
-      "lastAccessed": 1786091873996,
+      "accessCount": 25,
+      "lastAccessed": 1786093189988,
+      "type": "file"
+    },
+    {
+      "path": "src/components/HeroDiagram.tsx",
+      "accessCount": 12,
+      "lastAccessed": 1786093559222,
       "type": "file"
     },
     {
@@ -163,6 +169,12 @@
       "type": "file"
     },
     {
+      "path": "src/components/Grain.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1786093313314,
+      "type": "file"
+    },
+    {
       "path": "src/components/SmoothScroll.tsx",
       "accessCount": 2,
       "lastAccessed": 1786090946250,
@@ -196,12 +208,6 @@
       "path": "src/components/Preloader.tsx",
       "accessCount": 2,
       "lastAccessed": 1786091280795,
-      "type": "file"
-    },
-    {
-      "path": "src/components/Grain.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1786091419087,
       "type": "file"
     },
     {
@@ -250,6 +256,12 @@
       "path": "src/components/Contact.tsx",
       "accessCount": 1,
       "lastAccessed": 1786091171410,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/heroNodes.ts",
+      "accessCount": 1,
+      "lastAccessed": 1786092945431,
       "type": "file"
     }
   ],
