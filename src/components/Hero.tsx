@@ -1,119 +1,230 @@
 "use client";
 
-import { motion, useMotionValue, useSpring } from "framer-motion";
-import { Github } from "lucide-react";
-import React, { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+    motion,
+    useMotionValue,
+    useReducedMotion,
+    useScroll,
+    useSpring,
+    useTransform,
+} from "framer-motion";
+import { EASE } from "@/lib/motion";
+import RevealText from "./RevealText";
 
-function MagneticButton({ children }: { children: React.ReactNode }) {
-    const ref = useRef<HTMLDivElement>(null);
-    const x = useMotionValue(0);
-    const y = useMotionValue(0);
+/** angle in degrees (0 = east, clockwise), dist as a fraction of the ray unit. */
+type Ray = { label: string; angle: number; dist: number; weak?: boolean };
 
-    const springConfig = { damping: 15, stiffness: 150, mass: 0.1 };
-    const springX = useSpring(x, springConfig);
-    const springY = useSpring(y, springConfig);
+/**
+ * The 55°–125° cone points straight at the headline, so nothing is placed
+ * there — that gap is what keeps the diagram off the name.
+ */
+const RAYS: Ray[] = [
+    // the top rays stay short so their labels clear the fixed header bar
+    { label: "FULL-STACK", angle: -90, dist: 0.56 },
+    { label: "AI RESEARCH", angle: -46, dist: 0.82 },
+    { label: "SYSTEMS", angle: -8, dist: 1.0 },
+    { label: "PRODUCT", angle: 30, dist: 0.85 },
+    { label: "0 → 1", angle: 52, dist: 0.58 },
+    { label: "STRATEGY", angle: 128, dist: 0.58 },
+    { label: "INFRA", angle: 172, dist: 1.0 },
+    { label: "RESEARCH", angle: -134, dist: 0.78 },
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!ref.current) return;
-        const { clientX, clientY } = e;
-        const { height, width, left, top } = ref.current.getBoundingClientRect();
-        const middleX = clientX - (left + width / 2);
-        const middleY = clientY - (top + height / 2);
-        x.set(middleX * 0.3);
-        y.set(middleY * 0.3);
-    };
-
-    const handleMouseLeave = () => {
-        x.set(0);
-        y.set(0);
-    };
-
-    return (
-        <motion.div
-            ref={ref}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            style={{ x: springX, y: springY }}
-            className="inline-block"
-        >
-            {children}
-        </motion.div>
-    );
-}
+    { label: "PYTORCH", angle: -120, dist: 0.62, weak: true },
+    { label: "RELENTLESS", angle: -68, dist: 0.68, weak: true },
+    { label: "PRECISION", angle: -26, dist: 0.72, weak: true },
+    { label: "TYPESCRIPT", angle: 10, dist: 0.68, weak: true },
+    { label: "NIGHT OWL", angle: 46, dist: 0.44, weak: true },
+    { label: "SHIP IT", angle: 134, dist: 0.44, weak: true },
+    { label: "KUBERNETES", angle: 156, dist: 0.7, weak: true },
+    { label: "CTRL+Z", angle: -158, dist: 0.66, weak: true },
+];
 
 export default function Hero() {
-    const title = "HAESEONG KWON";
-    const subTextEn = "0 to 1: Full-Cycle Architect & AI Research Engineer";
-    const subTextKr = "기획부터 인프라까지, 무에서 유를 창조하는 풀사이클 아키텍트이자 AI 연구엔지니어";
+    const sectionRef = useRef<HTMLElement>(null);
+    const reduced = useReducedMotion();
+    const [{ blockPx, coverScale }, setBlock] = useState({ blockPx: 88, coverScale: 30 });
+
+    const { scrollYProgress } = useScroll({
+        target: sectionRef,
+        offset: ["start start", "end end"],
+    });
+
+    // The block sits at 44% height and spins while it grows, so size it by its
+    // inscribed circle: side/2 must reach the furthest corner at any rotation.
+    useEffect(() => {
+        const measure = () => {
+            const size = window.innerWidth < 768 ? 64 : 88;
+            const reach = Math.hypot(window.innerWidth / 2, window.innerHeight * 0.56);
+            setBlock({ blockPx: size, coverScale: Math.ceil((2 * reach) / size) + 1 });
+        };
+        measure();
+        window.addEventListener("resize", measure);
+        return () => window.removeEventListener("resize", measure);
+    }, []);
+
+    // Pointer parallax — the diagram drifts against the cursor, the block barely moves.
+    const px = useMotionValue(0);
+    const py = useMotionValue(0);
+    const driftX = useSpring(px, { stiffness: 60, damping: 20, mass: 0.8 });
+    const driftY = useSpring(py, { stiffness: 60, damping: 20, mass: 0.8 });
+
+    useEffect(() => {
+        if (reduced) return;
+        const onMove = (e: PointerEvent) => {
+            px.set((e.clientX / window.innerWidth - 0.5) * 44);
+            py.set((e.clientY / window.innerHeight - 0.5) * 44);
+        };
+        window.addEventListener("pointermove", onMove, { passive: true });
+        return () => window.removeEventListener("pointermove", onMove);
+    }, [px, py, reduced]);
+
+    const blockScale = useTransform(scrollYProgress, [0, 0.68], [1, coverScale]);
+    const blockRotate = useTransform(scrollYProgress, [0, 0.68], [0, 45]);
+    const raysScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.5]);
+    const raysOpacity = useTransform(scrollYProgress, [0, 0.32], [1, 0]);
+    const chromeOpacity = useTransform(scrollYProgress, [0, 0.22], [1, 0]);
+    const inverseOpacity = useTransform(scrollYProgress, [0.5, 0.72], [0, 1]);
+    const inverseY = useTransform(scrollYProgress, [0.5, 0.78], [40, 0]);
 
     return (
-        <section id="about" className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden bg-background px-6">
-            {/* Subtle Grain Overlay */}
-            <div className="pointer-events-none absolute inset-0 opacity-[0.02] mix-blend-difference" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')" }}></div>
+        <section
+            id="index"
+            ref={sectionRef}
+            className="relative w-full"
+            style={{ height: reduced ? "100vh" : "340vh" }}
+        >
+            <div className="sticky top-0 h-screen w-full overflow-hidden bg-paper">
+                {/* ---------- radial diagram ---------- */}
+                {/* --ray is the diagram's radius unit; phones get a tighter one so
+                    edge labels stay inside the viewport */}
+                <motion.div
+                    className="absolute inset-0 [--ray:min(30vw,40vh)] md:[--ray:min(42vw,52vh)]"
+                    style={{ x: driftX, y: driftY, scale: raysScale, opacity: raysOpacity }}
+                    aria-hidden
+                >
+                    {RAYS.map((ray, i) => {
+                        const rad = (ray.angle * Math.PI) / 180;
+                        const length = `calc(${ray.dist} * var(--ray))`;
+                        // Labels are placed, not rotated — anchored on the side the
+                        // ray points at, so near-vertical rays sit above/below their
+                        // endpoint instead of colliding with their neighbours.
+                        const anchor =
+                            ray.angle < -65 && ray.angle > -115
+                                ? "translate(-50%, calc(-100% - 10px))"
+                                : ray.angle > 65 && ray.angle < 115
+                                    ? "translate(-50%, 10px)"
+                                    : Math.abs(ray.angle) > 90
+                                        ? "translate(calc(-100% - 10px), -50%)"
+                                        : "translate(10px, -50%)";
 
-            <div className="flex flex-col items-center text-center gap-6 relative z-10 w-full max-w-[120rem]">
+                        return (
+                            <motion.div
+                                key={ray.label}
+                                className={ray.weak ? "hidden md:block" : ""}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 1.4, delay: 0.5 + (i % 6) * 0.09, ease: EASE.expo }}
+                            >
+                                <motion.div
+                                    className={`absolute top-[44%] left-1/2 h-px origin-left ${ray.weak ? "bg-ink/12" : "bg-ink/40"
+                                        }`}
+                                    style={{ width: length, rotate: ray.angle }}
+                                    initial={{ scaleX: 0 }}
+                                    animate={{ scaleX: 1 }}
+                                    transition={{ duration: 1.6, delay: 0.5, ease: EASE.expo }}
+                                />
+                                <span
+                                    className={
+                                        ray.weak
+                                            ? "label absolute whitespace-nowrap text-ink/30"
+                                            : "font-display absolute whitespace-nowrap text-[clamp(0.7rem,1.5vw,1.35rem)] uppercase text-ink"
+                                    }
+                                    style={{
+                                        left: `calc(50% + ${(Math.cos(rad) * ray.dist).toFixed(4)} * var(--ray))`,
+                                        top: `calc(44% + ${(Math.sin(rad) * ray.dist).toFixed(4)} * var(--ray))`,
+                                        transform: anchor,
+                                    }}
+                                >
+                                    {ray.label}
+                                </span>
+                            </motion.div>
+                        );
+                    })}
+                </motion.div>
 
-                {/* Massive Headline */}
-                <div className="overflow-hidden w-full flex justify-center">
-                    <motion.h1
-                        initial={{ y: "100%", opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        className="font-black text-foreground leading-[0.85] tracking-tighter uppercase w-full break-words md:break-keep px-4"
-                        style={{ fontSize: "clamp(4rem, 16vw, 15rem)" }}
+                {/* ---------- the block ---------- */}
+                <motion.div
+                    aria-hidden
+                    className="absolute top-[44%] left-1/2 bg-ink"
+                    style={{
+                        width: blockPx,
+                        height: blockPx,
+                        marginLeft: -blockPx / 2,
+                        marginTop: -blockPx / 2,
+                        scale: blockScale,
+                        rotate: blockRotate,
+                    }}
+                />
+
+                {/* ---------- paper chrome ---------- */}
+                <motion.div
+                    className="pointer-events-none absolute inset-0 flex flex-col justify-between px-6 py-24 md:px-12 md:py-28"
+                    style={{ opacity: chromeOpacity }}
+                >
+                    <div />
+                    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                        <RevealText
+                            immediate
+                            as="h1"
+                            delay={0.7}
+                            text="HAESEONG KWON"
+                            className="font-display uppercase leading-[0.82] text-ink"
+                            style={{ fontSize: "clamp(2.25rem, 6.5vw, 6rem)" }}
+                        />
+                        <motion.p
+                            className="label max-w-[22rem] leading-[1.8] text-ink/50 md:text-right"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 1, delay: 1.1, ease: EASE.expo }}
+                        >
+                            Full-Cycle Architect &amp; AI Research Engineer — Seoul
+                        </motion.p>
+                    </div>
+                </motion.div>
+
+                {/* ---------- scroll hint ---------- */}
+                <motion.div
+                    className="pointer-events-none absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-3"
+                    style={{ opacity: chromeOpacity }}
+                >
+                    <span className="label text-ink/40">SCROLL</span>
+                    <div className="relative h-px w-16 overflow-hidden bg-ink/20">
+                        <motion.div
+                            className="absolute inset-y-0 w-1/3 bg-ink"
+                            animate={{ x: ["-100%", "300%"] }}
+                            transition={{ duration: 1.8, repeat: Infinity, ease: EASE.inOut }}
+                        />
+                    </div>
+                </motion.div>
+
+                {/* ---------- ink chrome, revealed once the block has taken over ---------- */}
+                <motion.div
+                    className="on-ink pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center"
+                    style={{ opacity: inverseOpacity, y: inverseY }}
+                >
+                    <span className="label text-paper/40">EST. 2022 — PORTFOLIO 2026</span>
+                    <p
+                        className="font-display max-w-[22ch] uppercase leading-[0.92] text-paper"
+                        style={{ fontSize: "clamp(1.75rem, 5vw, 4.5rem)" }}
                     >
-                        {title}
-                    </motion.h1>
-                </div>
-
-                {/* Bilingual Sub-text */}
-                <div className="flex flex-col items-center gap-3 mt-4 md:mt-8 overflow-hidden">
-                    <motion.div
-                        initial={{ y: "100%", opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                        className="flex flex-col items-center gap-2"
-                    >
-                        <p className="text-foreground/80 font-semibold text-sm md:text-lg tracking-[0.2em] uppercase">
-                            {subTextEn}
-                        </p>
-                        <p className="text-foreground/50 font-medium text-xs md:text-sm tracking-widest break-keep max-w-lg">
-                            {subTextKr}
-                        </p>
-                    </motion.div>
-                </div>
-
-                <div className="mt-8 overflow-hidden">
-                    <motion.div
-                        initial={{ y: "100%", opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                        <MagneticButton>
-                            <a href="https://github.com/Haeseong-Kwon" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-16 h-16 rounded-full border border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300 text-foreground group">
-                                <Github size={24} className="group-hover:scale-110 transition-transform duration-300" />
-                            </a>
-                        </MagneticButton>
-                    </motion.div>
-                </div>
+                        Nothing to something.
+                    </p>
+                    <p className="selectable break-keep max-w-md text-sm leading-[1.9] text-paper/50">
+                        기획부터 인프라까지, 무에서 유를 창조하는 풀사이클 아키텍트이자 AI 연구엔지니어.
+                    </p>
+                </motion.div>
             </div>
-
-            {/* Scroll Indicator */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1, delay: 1 }}
-                className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-foreground/40"
-            >
-                <span className="text-xs uppercase tracking-[0.3em] font-medium">Scroll</span>
-                <div className="w-[1px] h-12 bg-foreground/20 relative overflow-hidden">
-                    <motion.div
-                        animate={{ y: ["-100%", "100%"] }}
-                        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                        className="absolute top-0 left-0 w-full h-full bg-foreground"
-                    />
-                </div>
-            </motion.div>
         </section>
     );
 }

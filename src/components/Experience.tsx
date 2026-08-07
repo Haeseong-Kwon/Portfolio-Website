@@ -1,105 +1,101 @@
 "use client";
 
 import { motion } from "framer-motion";
+import SectionHeader from "./SectionHeader";
+import { EASE, VIEWPORT } from "@/lib/motion";
 
-const experiences = [
+const EXPERIENCES = [
     {
         role: "Service Launch & Platform Strategy",
-        krRole: "통합 개발 플랫폼 'AOP' 기획 및 외주 서비스 런칭 주도",
+        kr: "통합 개발 플랫폼 'AOP' 기획 및 외주 서비스 런칭 주도",
         company: "AOP",
-        date: "2023 - Present",
+        date: "2023 — NOW",
     },
     {
         role: "Marketing Agency Infrastructure",
-        krRole: "마케팅 에이전시 및 산업 플랫폼 웹 인프라 전면 현대화",
+        kr: "마케팅 에이전시 및 산업 플랫폼 웹 인프라 전면 현대화",
         company: "GrowingUp",
         date: "2023",
     },
     {
         role: "Data-Driven E-commerce Operation",
-        krRole: "'오스타몰k' 운영 3개월 내 파워 등급 달성 및 데이터 기반 시장 대응",
+        kr: "'오스타몰k' 운영 3개월 내 파워 등급 달성 및 데이터 기반 시장 대응",
         company: "오스타몰k",
         date: "2023",
     },
     {
         role: "Crowdfunding Success Record",
-        krRole: "와디즈 MVP 기획 및 프로젝트 연속 성공 (달성률 3000%)",
+        kr: "와디즈 MVP 기획 및 프로젝트 연속 성공 (달성률 3000%)",
         company: "Wadiz",
         date: "2024",
     },
     {
         role: "Deoklim Basic Development",
-        krRole: "B2B 산업군에 맞춘 견고한 인프라 및 UI/UX 설계",
+        kr: "B2B 산업군에 맞춘 견고한 인프라 및 UI/UX 설계",
         company: "Shotcrete117",
         date: "2023",
     },
     {
         role: "Full-Cycle Freelance Management",
-        krRole: "기획부터 세무 행정까지 전 과정을 독립적으로 수행하는 1인 운용",
+        kr: "기획부터 세무 행정까지 전 과정을 독립적으로 수행하는 1인 운용",
         company: "Independent",
-        date: "2022 - Present",
+        date: "2022 — NOW",
     },
 ];
 
 export default function Experience() {
     return (
-        <section id="experience" className="py-32 px-6 md:px-12 lg:px-24 w-full bg-background border-t border-foreground">
-            <div className="max-w-[120rem] mx-auto">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-8">
-                    <div className="overflow-hidden">
-                        <motion.h2
-                            initial={{ y: "100%" }}
-                            whileInView={{ y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                            className="text-6xl md:text-8xl font-black tracking-tighter uppercase text-foreground leading-[0.9]"
-                        >
-                            EXPERIENCE
-                        </motion.h2>
-                    </div>
-                    <div className="overflow-hidden">
-                        <motion.p
-                            initial={{ y: "100%" }}
-                            whileInView={{ y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                            className="text-foreground/50 font-medium tracking-widest uppercase text-sm md:text-base max-w-sm text-right"
-                        >
-                            A track record of absolute excellence in business and development
-                        </motion.p>
-                    </div>
-                </div>
+        <section id="experience" className="w-full bg-paper px-6 py-28 md:px-12 md:py-40">
+            <SectionHeader
+                index="01 — EXPERIENCE"
+                title="Track record"
+                caption="Shipped, operated and owned end to end"
+            />
 
-                <div className="flex flex-col border-t border-foreground">
-                    {experiences.map((item, idx) => (
-                        <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: "-50px" }}
-                            transition={{ duration: 0.6, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                            className="group flex flex-col md:flex-row md:items-center justify-between py-10 md:py-14 border-b border-foreground hover:bg-foreground hover:text-background transition-colors duration-500 px-6 -mx-6 md:px-12 md:-mx-12 cursor-pointer"
-                        >
-                            <div className="flex flex-col gap-2 md:w-1/2">
-                                <h3 className="text-3xl md:text-5xl font-bold tracking-tight group-hover:text-background transition-colors duration-500 break-words pr-8">
+            <div className="mt-20 md:mt-28">
+                {EXPERIENCES.map((item, i) => (
+                    <motion.div
+                        key={item.role}
+                        className="group relative overflow-hidden border-t border-ink/20 last:border-b"
+                        initial={{ opacity: 0, y: 28 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={VIEWPORT}
+                        transition={{ duration: 0.8, delay: i * 0.05, ease: EASE.expo }}
+                    >
+                        {/* fill sweeps in from the left rather than snapping */}
+                        <span className="absolute inset-0 origin-left scale-x-0 bg-ink transition-transform duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100" />
+
+                        <div className="relative flex flex-col gap-6 py-8 transition-colors duration-500 group-hover:text-paper md:flex-row md:items-center md:gap-10 md:py-12">
+                            <span className="label w-12 shrink-0 tabular-nums opacity-40">
+                                {String(i + 1).padStart(2, "0")}
+                            </span>
+
+                            <div className="flex-1">
+                                <h3
+                                    className="font-display uppercase leading-[0.95]"
+                                    style={{ fontSize: "clamp(1.35rem, 3.2vw, 2.75rem)" }}
+                                >
                                     {item.role}
                                 </h3>
-                                <p className="text-foreground/60 group-hover:text-background/70 font-medium text-sm md:text-base mt-2 transition-colors duration-500 break-keep">
-                                    {item.krRole}
+                                <p className="selectable break-keep mt-3 max-w-xl text-sm leading-relaxed opacity-55">
+                                    {item.kr}
                                 </p>
                             </div>
 
-                            <div className="flex flex-col md:items-end gap-1 mt-6 md:mt-0 font-medium">
-                                <span className="text-xl md:text-2xl font-bold tracking-tight uppercase">
-                                    {item.company}
-                                </span>
-                                <span className="text-sm md:text-base text-foreground/50 group-hover:text-background/50 transition-colors duration-500 font-mono">
-                                    {item.date}
-                                </span>
+                            <div className="flex items-baseline gap-6 md:w-64 md:shrink-0 md:flex-col md:items-end md:gap-2">
+                                <span className="label tracking-[0.14em]">{item.company}</span>
+                                <span className="label tabular-nums opacity-45">{item.date}</span>
                             </div>
-                        </motion.div>
-                    ))}
-                </div>
+
+                            <span
+                                aria-hidden
+                                className="hidden -translate-x-4 text-2xl opacity-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100 md:block"
+                            >
+                                ↗
+                            </span>
+                        </div>
+                    </motion.div>
+                ))}
             </div>
         </section>
     );

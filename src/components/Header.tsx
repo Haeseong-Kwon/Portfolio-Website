@@ -1,176 +1,141 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useScroll, useMotionValueEvent, motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { EASE } from "@/lib/motion";
+import { smoothScrollTo } from "./SmoothScroll";
 
-const navItems = [
-    { name: "About", href: "#about" },
-    { name: "Experience", href: "#experience" },
-    { name: "Tech", href: "#tech" },
-    { name: "Projects", href: "#projects" },
-    { name: "Awards", href: "#awards" },
-];
+export const NAV = [
+    { id: "index", label: "INDEX" },
+    { id: "experience", label: "EXPERIENCE" },
+    { id: "stack", label: "STACK" },
+    { id: "work", label: "WORK" },
+    { id: "awards", label: "AWARDS" },
+    { id: "contact", label: "CONTACT" },
+] as const;
 
+/**
+ * The bar never picks a colour — `mix-blend-difference` on white makes it
+ * read as ink over paper sections and as paper over ink ones, automatically.
+ */
 export default function Header() {
     const [hidden, setHidden] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [activeSection, setActiveSection] = useState("about");
-
+    const [open, setOpen] = useState(false);
+    const [active, setActive] = useState<string>("index");
     const { scrollY, scrollYProgress } = useScroll();
 
-    useMotionValueEvent(scrollY, "change", (latest) => {
-        const previous = scrollY.getPrevious() ?? 0;
-        if (latest > previous && latest > 150) {
-            setHidden(true);
-        } else {
-            setHidden(false);
-        }
+    useMotionValueEvent(scrollY, "change", (y) => {
+        const prev = scrollY.getPrevious() ?? 0;
+        setHidden(y > prev && y > 220 && !open);
     });
 
     useEffect(() => {
-        const handleHashChange = () => {
-            const hash = window.location.hash.replace("#", "") || "about";
-            setActiveSection(hash);
-        };
-        window.addEventListener("hashchange", handleHashChange);
-
-        // Scroll Spy Logic
-        const observerCallback: IntersectionObserverCallback = (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    setActiveSection(entry.target.id);
-                }
-            });
-        };
-
-        const observerOptions = {
-            rootMargin: "-20% 0px -70% 0px", // Triggers when section is near top
-            threshold: 0
-        };
-
-        const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-        navItems.forEach((item) => {
-            const element = document.querySelector(item.href);
-            if (element) observer.observe(element);
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) setActive(entry.target.id);
+                });
+            },
+            { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
+        );
+        NAV.forEach(({ id }) => {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el);
         });
-
-        return () => {
-            window.removeEventListener("hashchange", handleHashChange);
-            observer.disconnect();
-        };
+        return () => observer.disconnect();
     }, []);
 
-    // Staggered variants for mobile menu items
-    const menuContainerVariants = {
-        hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-        },
+    useEffect(() => {
+        document.body.style.overflow = open ? "hidden" : "";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [open]);
+
+    const go = (id: string) => {
+        setOpen(false);
+        smoothScrollTo(id);
     };
 
-    const menuItemVariants = {
-        hidden: { y: 50, opacity: 0 },
-        show: { y: 0, opacity: 1, transition: { type: "spring" as const, stiffness: 100, damping: 12 } },
-    };
+    const activeIndex = Math.max(0, NAV.findIndex((n) => n.id === active));
 
     return (
         <>
-            {/* Scroll Progress Indicator */}
             <motion.div
-                className="fixed top-0 left-0 right-0 h-[3px] bg-foreground z-[60] origin-left"
+                aria-hidden
+                className="fixed top-0 right-0 left-0 z-[85] h-px origin-left bg-white mix-blend-difference"
                 style={{ scaleX: scrollYProgress }}
             />
 
-            {/* Sticky Glassmorphism Nav */}
             <motion.header
-                variants={{ visible: { y: 0 }, hidden: { y: "-100%" } }}
-                animate={hidden ? "hidden" : "visible"}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-                className="fixed top-0 z-50 w-full border-b border-border/20 bg-background/70 backdrop-blur-xl mt-[3px]"
+                className="fixed top-0 z-[80] w-full mix-blend-difference"
+                animate={{ y: hidden ? "-110%" : "0%" }}
+                transition={{ duration: 0.5, ease: EASE.expo }}
             >
-                <div className="w-full flex h-20 items-center justify-between px-6 md:px-12 lg:px-24">
-                    <Link href="/" className="font-bold tracking-tight text-xl z-50 relative">
-                        HaeSeong Kwon
-                    </Link>
+                <div className="flex items-center justify-between px-6 py-6 text-white md:px-12">
+                    <button onClick={() => go("index")} className="label tracking-[0.16em]">
+                        HAESEONG KWON
+                    </button>
 
-                    {/* Desktop Nav */}
-                    <nav className="hidden sm:flex items-center gap-8">
-                        <ul className="flex items-center gap-8 text-sm font-semibold tracking-wide text-foreground/80">
-                            {navItems.map((item) => {
-                                const isActive = activeSection === item.href.replace("#", "");
-                                return (
-                                    <li key={item.name} className="relative group/navitem">
-                                        <Link
-                                            href={item.href}
-                                            onClick={() => setActiveSection(item.href.replace("#", ""))}
-                                            className={`transition-colors py-1 ${isActive ? "text-foreground" : "hover:text-foreground"}`}
-                                        >
-                                            {item.name}
-                                        </Link>
-
-                                        {/* Center-out underline hover effect */}
-                                        <span className="absolute -bottom-2 left-1/2 w-0 h-0.5 bg-foreground/30 transition-all duration-300 ease-out group-hover/navitem:w-full group-hover/navitem:left-0" />
-
-                                        {/* Active Section highlight */}
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="active-nav"
-                                                className="absolute -bottom-2 left-0 right-0 h-0.5 bg-foreground z-10"
-                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                            />
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ul>
+                    <nav className="hidden items-center gap-8 md:flex">
+                        {NAV.map(({ id, label }) => (
+                            <button
+                                key={id}
+                                onClick={() => go(id)}
+                                aria-current={active === id ? "true" : undefined}
+                                className="label relative py-1"
+                            >
+                                <span className={active === id ? "opacity-100" : "opacity-45"}>{label}</span>
+                                {active === id && (
+                                    <motion.span
+                                        layoutId="nav-underline"
+                                        className="absolute -bottom-0.5 left-0 h-px w-full bg-white"
+                                        transition={{ duration: 0.5, ease: EASE.expo }}
+                                    />
+                                )}
+                            </button>
+                        ))}
                     </nav>
 
-                    {/* Mobile Menu Toggle */}
-                    <button
-                        className="sm:hidden z-50 relative p-2 -mr-2 text-foreground"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        aria-label="Toggle menu"
-                    >
-                        {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-                    </button>
+                    <div className="flex items-center gap-6">
+                        <span className="label hidden tabular-nums opacity-45 md:inline">
+                            {String(activeIndex + 1).padStart(2, "0")} / {String(NAV.length).padStart(2, "0")}
+                        </span>
+                        <button
+                            onClick={() => setOpen((v) => !v)}
+                            aria-expanded={open}
+                            aria-label={open ? "Close menu" : "Open menu"}
+                            className="label md:hidden"
+                        >
+                            {open ? "CLOSE" : "MENU"}
+                        </button>
+                    </div>
                 </div>
             </motion.header>
 
-            {/* Full-Screen Mobile Menu Overlay */}
             <AnimatePresence>
-                {mobileMenuOpen && (
+                {open && (
                     <motion.div
-                        initial={{ opacity: 0, y: "100%" }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: "100%" }}
-                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="fixed inset-0 z-40 bg-background flex flex-col items-center justify-center sm:hidden"
+                        className="on-ink fixed inset-0 z-[75] flex flex-col justify-center bg-ink px-6 md:hidden"
+                        initial={{ clipPath: "inset(0 0 100% 0)" }}
+                        animate={{ clipPath: "inset(0 0 0% 0)" }}
+                        exit={{ clipPath: "inset(0 0 100% 0)" }}
+                        transition={{ duration: 0.7, ease: EASE.expo }}
                     >
-                        <motion.ul
-                            variants={menuContainerVariants}
-                            initial="hidden"
-                            animate="show"
-                            className="flex flex-col items-center gap-10"
-                        >
-                            {navItems.map((item) => (
-                                <motion.li key={item.name} variants={menuItemVariants}>
-                                    <Link
-                                        href={item.href}
-                                        onClick={() => {
-                                            setActiveSection(item.href.replace("#", ""));
-                                            setMobileMenuOpen(false);
-                                        }}
-                                        className="text-5xl font-bold tracking-tighter text-foreground hover:text-foreground/70 transition-colors"
-                                    >
-                                        {item.name}
-                                    </Link>
-                                </motion.li>
-                            ))}
-                        </motion.ul>
+                        {NAV.map(({ id, label }, i) => (
+                            <div key={id} className="overflow-hidden border-b border-paper/15">
+                                <motion.button
+                                    onClick={() => go(id)}
+                                    className="font-display block w-full py-5 text-left text-4xl uppercase text-paper"
+                                    initial={{ y: "110%" }}
+                                    animate={{ y: "0%" }}
+                                    exit={{ y: "110%" }}
+                                    transition={{ duration: 0.7, delay: 0.12 + i * 0.05, ease: EASE.expo }}
+                                >
+                                    {label}
+                                </motion.button>
+                            </div>
+                        ))}
                     </motion.div>
                 )}
             </AnimatePresence>
